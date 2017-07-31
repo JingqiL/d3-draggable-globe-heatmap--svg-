@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<head>
+<style type="text/css">
+    body {
+      font-family: "Helvetica Neue", sans-serif;
+      margin: 0;
+      background: #3a403d;
+    }
+</style>
+</head>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://d3js.org/topojson.v2.min.js"></script>
+<script src="https://unpkg.com/topojson-client@2"></script>
+<script src="https://unpkg.com/three@0.84"></script>
+<script src="versor.js"></script>
+<body>
+    <svg width="2000", height="1500" ></svg>
+    <script>
+    
+        var width = 2000,
+            height = 1500,
+            scene = new THREE.Scene,
+            radius = 500;
+
+        var projection = d3.geoOrthographic()
+        .scale(500)
+        .translate([width/2, height/2])
+        .clipAngle(180)
+        .precision(0.1);
+
+        var svg = d3.select("svg");
+
+        svg.append("circle")
+        .attr("cx", width/2)
+        .attr("cy", height/2)
+        .attr("r", radius)
+        .style("fill", "#fff")
+        .style("stroke", "black");
+
+        var path = d3.geoPath()
+        .projection(projection);
+
+        var g = svg.append("g");
+
+        // var graticule = d3.geoGraticule()
+
+        // g.append("path")
+        // .datum(graticule)
+        // .attr("class", "graticule")
+        // .attr("d", path)
+        // .style("fill", "#fff")
+        // .style("stroke", "#fff");
+
+        var color = d3.scaleThreshold()
+        .domain(d3.range(2, 10))
+        .range(d3.schemeYlGnBu[9]);
+
+        var drag = d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged);
+
+        svg.call(drag);
+
+        // d3.timer(function(elapsed) {
+
+        // projection.rotate([.001 * elapsed - 120, 0, 0]);
+        //  g.selectAll("path").attr("d", path);
+
+        // }); Self spinning!!!
+
+        d3.json("topo1.json", function (error, data){
+            
+            g.selectAll(".node")
+            .data(topojson.feature(data, data.objects.countries).features)
+            .enter().append("path")
+            .attr("class","node")
+            .attr("d", path)
+            .attr("fill", function(d) { return color(d.properties.densityscale); })
+            .style("stroke","#e9e9e9")
+            .style("opacity","1")
+            .append("title")
+            .text(function(d) { return d.properties.country + " : "+ d.properties.density; });
+        });
+
+        var render = function() {},
+            v0, // Mouse position in Cartesian coordinates at start of drag gesture.
+            r0, // Projection rotation as Euler angles at start.
+            q0; // Projection rotation as versor at start.
+
+        function dragstarted() {
+            v0 = versor.cartesian(projection.invert(d3.mouse(this)));
+            r0 = projection.rotate();
+            q0 = versor(r0);
+        }
+
+        function dragged() {
+            var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this))),
+                q1 = versor.multiply(q0, versor.delta(v0, v1)),
+                r1 = versor.rotation(q1);
+            projection.rotate(r1);
+            g.selectAll("path").attr("d", path);
+            render();
+        }
+
+        </script>
+</body>
