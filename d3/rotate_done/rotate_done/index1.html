@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<head>
+<style type="text/css">
+   
+</style>
+</head>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://d3js.org/topojson.v2.min.js"></script>
+<script src="https://unpkg.com/topojson-client@2"></script>
+<script src="https://unpkg.com/three@0.84"></script>
+<script src="versor.js"></script>
+<body>
+    <svg width="2000", height="1500" ></svg>
+    <script>
+        var width = 2000,
+            height = 1500;
+
+        var svg = d3.select("svg");
+
+        var projection = d3.geoEquirectangular().rotate([100,0]);
+
+        var path = d3.geoPath().projection(projection);
+
+        var g = svg.append("g");
+
+        var color = d3.scaleThreshold()
+        .domain(d3.range(2, 10))
+        .range(d3.schemeYlGnBu[9]);
+
+        d3.json("topo1.json", function (error, data){
+            
+            g.selectAll(".node")
+            .data(topojson.feature(data, data.objects.countries).features)
+            .enter().append("path")
+            .attr("class","node")
+            .attr("d", path)
+            .attr("fill", function(d) { return color(d.properties.densityscale); })
+            .style("stroke","#ccc")//#e9e9e9
+            .append("title")
+            .text(function(d) { return d.properties.country + " : "+ d.properties.density; });
+        });
+
+//         var render = function() {},
+//             v0, // Mouse position in Cartesian coordinates at start of drag gesture.
+//             r0, // Projection rotation as Euler angles at start.
+//             q0; // Projection rotation as versor at start.
+
+//         function dragstarted() {
+//             v0 = versor.cartesian(projection.invert(d3.mouse(this)));
+//             r0 = projection.rotate();
+//             q0 = versor(r0);
+//         }
+
+//         function dragged() {
+//             var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this))),
+//                 q1 = versor.multiply(q0, versor.delta(v0, v1)),
+//                 r1 = versor.rotation(q1);
+//             projection.rotate(r1);
+//             g.selectAll("path").attr("d", path);
+//             render();
+//         }
+
+//         function click(d) {
+//             // var x, y, k;
+
+//             // if (d && centered !== d) {
+//             // var centroid = path.centroid(d);
+//             //     x = centroid[0];
+//             //     y = centroid[1];
+//             //     k = 4;
+//             //     centered = d;
+//             // } else {
+//             //     x = width / 2;
+//             //     y = height / 2;
+//             //     k = 1;
+//             //     centered = null;
+//             // }
+
+//             // g.selectAll("path")
+//             // .classed("active", centered && function(d) { return d === centered; });
+
+//             // g.transition()
+//             // .duration(750)
+//             // .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
+//             // .style("stroke-width", 1.5 / k + "px");
+//             // console.log(d.properties.State);
+//             // console.log(projection.invert(d3.mouse(this)));
+//             console.log(-d.properties.longitude);
+//             projection.rotate([-d.properties.longitude,-d.properties.latitude,0]);
+//             g.selectAll("path").attr("d", path);
+// //
+//             plainprojection.rotate([-d.properties.longitude,0,0]);
+//             g.selectAll("path").transition().duration(2000).attr("d", plainpath);
+//             console.log(projection.rotate());
+//         }
+    </script>
+</body>
