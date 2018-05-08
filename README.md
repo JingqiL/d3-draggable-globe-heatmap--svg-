@@ -3,4 +3,4 @@
 
 <img src= "https://cdn.rawgit.com/JingqiL/d3-draggable-globe-heatmap--svg-/08c5abf2/rotate_done/Screen%20Shot%202018-04-25%20at%206.46.03%20PM.png">
 
-The screen shots are from the rotate_down folder.
+The screen shots are from the rotate_done folder.
